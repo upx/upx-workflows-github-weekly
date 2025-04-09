@@ -57,7 +57,7 @@ jobs:
           elif test -f /etc/fedora-release; then
             dnf update -y
             dnf install -y bash ca-certificates git
-            dnf install -y clang clang-analyzer clang-tools-extra cmake diffutils findutils gcc-c++ make python3 time
+            dnf install -y clang clang-analyzer clang-tools-extra cmake diffutils findutils gawk gcc-c++ make python3 time
           elif test -f /etc/debian_version; then
             apt-get update && apt-get upgrade -y
             apt-get install -y --no-install-recommends bash ca-certificates git
