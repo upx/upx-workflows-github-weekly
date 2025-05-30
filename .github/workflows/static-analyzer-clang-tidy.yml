@@ -24,11 +24,12 @@ jobs:
           - container: alpine:3.19                  # clang-17
           - container: alpine:3.20                  # clang-17
           - container: alpine:3.21                  # clang-19
-          - container: alpine:edge                  # clang-19
+          - container: alpine:3.22                  # clang-20
+          - container: alpine:edge                  # clang-20
           - container: archlinux:latest             # clang-19
           - container: chimeralinux/chimera:latest  # clang-19; uses libc++ instead of libstdc++
           - container: debian:unstable-slim         # clang-19
-          - container: fedora:41                    # clang-19
+          - container: fedora:42                    # clang-19
           - container: fedora:rawhide               # clang-19
           - container: opensuse/tumbleweed:latest   # clang-19
           - container: ubuntu:24.04                 # clang-18
@@ -38,7 +39,8 @@ jobs:
           - container: i386/alpine:3.19             # clang-17
           - container: i386/alpine:3.20             # clang-17
           - container: i386/alpine:3.21             # clang-19
-          - container: i386/alpine:edge             # clang-19
+          - container: i386/alpine:3.22             # clang-20
+          - container: i386/alpine:edge             # clang-20
           - container: i386/debian:unstable-slim    # clang-19
     name: ${{ format('clang-tidy {0}', matrix.container) }}
     runs-on: ubuntu-latest
