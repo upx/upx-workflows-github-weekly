@@ -229,6 +229,7 @@ jobs:
              echo "===== $dir"
              (cd "$dir" && ./upx --sysinfo -v)
              (cd "$dir" && ctest --parallel 8)
+             (cd "$dir" && find . -type d -name XTesting -print0 | xargs -0r rm -rf -v)
           done
 
       - name: 'Run file system test suite (busybox)'
