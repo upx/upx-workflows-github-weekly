@@ -22,16 +22,15 @@ env:
   UPX_CMAKE_CONFIG_FLAGS: -Wdev --warn-uninitialized
   UPX_DEBUG_TEST_FLOAT_DIVISION_BY_ZERO: 1
   UPX_DEBUG_TEST_LIBC_QSORT: 1
-  # 2025-03-05
-  ZIG_DIST_VERSION: 0.14.0
+  # 2025-05-21
+  ZIG_DIST_VERSION: 0.14.1
 
 jobs:
   job-linux-zigcc: # uses cmake + make
     if: github.repository_owner == 'upx'
     name: ${{ format('zigcc {0} {1}', matrix.zig_target, matrix.zig_pic) }}
     runs-on: ubuntu-latest
-    # ci.yml uses alpine:3.2x, so we test alpine:edge here
-    container: 'i386/alpine:edge'
+    container: 'i386/alpine:3.21'
     strategy:
       fail-fast: false
       matrix:
@@ -99,8 +98,9 @@ jobs:
           mkdir -p -v ~/.local/bin
           cd ~/.local/bin
           ZIG_DIST_NAME=zig-linux-x86-${ZIG_DIST_VERSION}
+          ZIG_DIST_NAME=zig-x86-linux-${ZIG_DIST_VERSION}
           #curl -sS -L -O https://ziglang.org/builds/${ZIG_DIST_NAME}.tar.xz
-          curl -sS -L -O https://ziglang.org/download/0.14.0/${ZIG_DIST_NAME}.tar.xz
+          curl -sS -L -O https://ziglang.org/download/0.14.1/${ZIG_DIST_NAME}.tar.xz
           ls -l ${ZIG_DIST_NAME}.tar.xz
           tar -xoJf ${ZIG_DIST_NAME}.tar.xz
           rm ${ZIG_DIST_NAME}.tar.xz
