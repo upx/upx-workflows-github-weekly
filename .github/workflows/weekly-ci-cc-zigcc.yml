@@ -16,6 +16,7 @@ env:
   UPX_CMAKE_CONFIG_FLAGS: -Wdev --warn-uninitialized
   UPX_DEBUG_TEST_FLOAT_DIVISION_BY_ZERO: 1
   UPX_DEBUG_TEST_LIBC_QSORT: 1
+  ZSTD_CLEVEL: 9
   # 2025-05-21
   ZIG_DIST_VERSION: 0.14.1
 
@@ -25,7 +26,8 @@ jobs:
     name: ${{ format('zigcc {0} {1}', matrix.zig_target, matrix.zig_pic) }}
     runs-on: ubuntu-latest
     # ci.yml uses alpine:3.22, so we test alpine:edge here
-    container: 'alpine:edge'
+    #container: 'alpine:edge'
+    container: ${{ (matrix.qemu == 'qemu-aarch64' && matrix.zig_pic == '-fPIE') && 'alpine:3.18' || 'alpine:edge' }}
     strategy:
       fail-fast: false
       matrix:
@@ -128,7 +130,7 @@ jobs:
             echo "UPX_CONFIG_DISABLE_SANITIZE=ON" >> $GITHUB_ENV
           fi
           echo "ZIG_FLAGS=$ZIG_FLAGS" >> $GITHUB_ENV
-      #- run: set -x; zig version; zig-cc --version; zig-cxx --version
+      - run: set -x; zig version; zig-cc --version || true; zig-cxx --version || true
       - run: zig-cc  -E -x c   -dM /dev/null # list predefined macros for C
       - run: zig-cxx -E -x c++ -dM /dev/null # list predefined macros for C++
       - name: ${{ format('Build Release with zig-cc -target {0} {1}', env.ZIG_TARGET, env.ZIG_PIC) }}
@@ -151,13 +153,12 @@ jobs:
             for d in $dirs; do DESTDIR="$PWD/tmp/artifact/$N/Install/$d" cmake --install build/zig/$d; done
           fi
           (cd build && shopt -s nullglob && cp -ai --parents */upx{,.exe} */*/*/upx{,.exe} "../tmp/artifact/$N")
-          (cd tmp/artifact && tar --sort=name -czf "$N.tar.gz" "$N" && rm -rf "./$N")
+          if command -v hardlink >/dev/null; then (cd "tmp/artifact/$N" && hardlink .) fi
+          (cd tmp/artifact && tar --sort=name --zstd -cf "$N.tar.zst" "$N" && rm -rf "./$N" && ls -la && zstd -tq "$N.tar.zst")
           echo "artifact_name=$N" >> $GITHUB_ENV
       - name: ${{ format('Upload artifact {0}', env.artifact_name) }}
         uses: actions/upload-artifact@v4
-        with:
-          name: ${{ env.artifact_name }}
-          path: tmp/artifact
+        with: { name: '${{ env.artifact_name }}', path: tmp/artifact }
       - name: 'Run install tests'
         if: ${{ contains(matrix.zig_target, '-linux') }}
         run: |
