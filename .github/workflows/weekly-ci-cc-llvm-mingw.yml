@@ -15,7 +15,7 @@ env:
   UPX_CMAKE_CONFIG_FLAGS: -Wdev --warn-uninitialized
   UPX_DEBUG_TEST_FLOAT_DIVISION_BY_ZERO: 1
   UPX_DEBUG_TEST_LIBC_QSORT: 1
-  ZSTD_CLEVEL: 9
+  ZSTD_CLEVEL: 17
 
 jobs:
   job-llvm-mingw: # uses cmake + make
@@ -48,12 +48,20 @@ jobs:
           - name: llvm-mingw-20250114-ucrt
             llvm_version: 19.1.7
             url: 'https://github.com/mstorsjo/llvm-mingw/releases/download/20250114/llvm-mingw-20250114-ucrt-ubuntu-20.04-x86_64.tar.xz'
-          - name: llvm-mingw-20250402-msvcrt
-            llvm_version: 20.1.2
-            url: 'https://github.com/mstorsjo/llvm-mingw/releases/download/20250402/llvm-mingw-20250402-msvcrt-ubuntu-20.04-x86_64.tar.xz'
-          - name: llvm-mingw-20250402-ucrt
-            llvm_version: 20.1.2
-            url: 'https://github.com/mstorsjo/llvm-mingw/releases/download/20250402/llvm-mingw-20250402-ucrt-ubuntu-20.04-x86_64.tar.xz'
+          - name: llvm-mingw-20250709-msvcrt
+            llvm_version: 20.1.8
+            url: 'https://github.com/mstorsjo/llvm-mingw/releases/download/20250709/llvm-mingw-20250709-msvcrt-ubuntu-22.04-x86_64.tar.xz'
+          - name: llvm-mingw-20250709-ucrt
+            llvm_version: 20.1.8
+            url: 'https://github.com/mstorsjo/llvm-mingw/releases/download/20250709/llvm-mingw-20250709-ucrt-ubuntu-22.04-x86_64.tar.xz'
+          - name: llvm-mingw-20250717-msvcrt
+            llvm_version: 21.1.0rc1
+            use_arm64ec: true
+            url: 'https://github.com/mstorsjo/llvm-mingw/releases/download/20250717/llvm-mingw-20250717-msvcrt-ubuntu-22.04-x86_64.tar.xz'
+          - name: llvm-mingw-20250717-ucrt
+            llvm_version: 21.1.0rc1
+            use_arm64ec: true
+            url: 'https://github.com/mstorsjo/llvm-mingw/releases/download/20250717/llvm-mingw-20250717-ucrt-ubuntu-22.04-x86_64.tar.xz'
     name: ${{ format('{0} {1}', matrix.name, matrix.llvm_version) }}
     runs-on: ubuntu-latest
     container: ubuntu:24.04
@@ -93,6 +101,17 @@ jobs:
         run: |
           export CC="aarch64-w64-mingw32-clang -static $xflags" CXX="aarch64-w64-mingw32-clang++ -static $xflags"
           make UPX_XTARGET=llvm-mingw/aarch64-w64-mingw32-clang-static xtarget/all
+
+      - name: 'Build clang arm64ec'
+        if: ${{ matrix.use_arm64ec }}
+        run: |
+          export CC="arm64ec-w64-mingw32-clang $xflags" CXX="arm64ec-w64-mingw32-clang++ $xflags"
+          make UPX_XTARGET=llvm-mingw/arm64ec-w64-mingw32-clang xtarget/all
+      - name: 'Build clang arm64ec static'
+        if: ${{ matrix.use_arm64ec }}
+        run: |
+          export CC="arm64ec-w64-mingw32-clang -static $xflags" CXX="arm64ec-w64-mingw32-clang++ -static $xflags"
+          make UPX_XTARGET=llvm-mingw/arm64ec-w64-mingw32-clang-static xtarget/all
 
       - name: 'Build clang armv7'
         run: |
@@ -146,7 +165,7 @@ jobs:
           done
           (cd build && cp -ai --parents */*/*/upx.exe "../tmp/artifact/$N")
           if command -v hardlink >/dev/null; then (cd "tmp/artifact/$N" && hardlink .) fi
-          (cd tmp/artifact && tar --sort=name --zstd -cf "$N.tar.zst" "$N" && rm -rf "./$N" && ls -la)
+          (cd tmp/artifact && tar --sort=name --zstd -cf "$N.tar.zst" "$N" && rm -rf "./$N" && ls -la && zstd -tq "$N.tar.zst")
           echo "artifact_name=$N" >> $GITHUB_ENV
       - name: ${{ format('Upload artifact {0}', env.artifact_name) }}
         uses: actions/upload-artifact@v4
