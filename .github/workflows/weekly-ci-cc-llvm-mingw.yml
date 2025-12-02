@@ -79,7 +79,7 @@ jobs:
           mkdir -p -v ~/.wine
           wineboot --init
       - name: 'Check out code'
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with: { submodules: true }
       - name: ${{ format('Install {0} {1}', matrix.name, matrix.llvm_version) }}
         run: |

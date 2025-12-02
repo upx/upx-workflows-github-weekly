@@ -48,7 +48,7 @@ jobs:
     steps:
       - run: git config --global core.autocrlf false
       - name: 'Check out code'
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with: { submodules: true }
       - name: 'Set up Developer Command Prompt'
         if: matrix.vsversion

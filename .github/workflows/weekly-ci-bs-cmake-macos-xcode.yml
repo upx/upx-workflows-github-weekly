@@ -36,7 +36,7 @@ jobs:
         if: ${{ matrix.xcode_version }}
         with: { xcode-version: '${{ matrix.xcode_version }}' }
       - name: Check out code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with: { submodules: true }
       - name: Install brew packages
         run: |
